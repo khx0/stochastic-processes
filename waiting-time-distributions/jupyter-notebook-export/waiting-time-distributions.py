@@ -5,7 +5,7 @@
 # ## Nikolas Schnellbächer (2018-08-14)
 
 # Many stochastic processes can be characterized by the life time of the states that a given system can be found in.
-# By monitoring the waiting times one can obtain so called waiting time distributions, which often are a good indicator for the underlying physical/stochastic process. The analysis of waiting time distributions is also useful to address the question if a given system has internal (hidden) substates, which might reveal their existence by modulating the observed waiting time distribution. Often one does not know a priori how many internal states their are, and one might find an answer to this question by investigating the waiting time distributions.
+# By monitoring the waiting times one can obtain so called waiting time distributions, which often are a good indicator for the underlying physical/stochastic process. The analysis of waiting time distributions is also useful to address the question if a given system has internal (hidden) substates, which might reveal their existence by modulating the observed waiting time distribution. Often one does not know a priori how many internal states there are, and one might find an answer to this question by investigating the waiting time distributions.
 # 
 # ## A simple one-step process
 # For a very simple example, we start by considering a state with a characteristic mean life time $\tau$. It is well known, that the waiting time distribution then is a simple exponential distribution
@@ -72,7 +72,7 @@
 # Remember, that we always assume, that the two processes happen in the same sequential order (first $A$, followed by step $B$).
 # Below we show by direct numerical sampling, that this is indeed the case and compare the observed waiting time distributions for the one and two step process.
 
-# In[26]:
+# In[1]:
 
 
 import numpy as np
@@ -83,11 +83,29 @@ import matplotlib.pyplot as plt
 # In[2]:
 
 
+def getHistogramCoordinates(X, nbins, normed = True):
+    '''
+    Creates x,y data pairs of the histogram data using
+    numpy's histogram function.
+    '''
+    hist, bin_edges = np.histogram(X, bins = nBins, normed = True)
+    bin_centers = (bin_edges[1:] + bin_edges[0:-1]) / 2.0
+    assert hist.shape == bin_centers.shape, "Error: Shape assertion failed."
+
+    res = np.zeros((nBins, 2))
+    res[:, 0] = bin_centers
+    res[:, 1] = hist
+    return res
+
+
+# In[3]:
+
+
 get_ipython().run_line_magic('matplotlib', 'inline')
 get_ipython().run_line_magic('config', "InlineBackend.figure_formats = {'png', 'retina'}")
 
 
-# In[3]:
+# In[4]:
 
 
 # this is how we can use python to sample from an exponential distribution
@@ -97,7 +115,7 @@ sampleTime = np.random.exponential(meanTime)
 print("sample waiting time =", sampleTime)
 
 
-# In[4]:
+# In[5]:
 
 
 # specify the number of samples
@@ -111,7 +129,7 @@ print(sampleTimes.shape)
 
 # Next we create the theoretical distribution, which for this case is of course the standard probability density function of the exponential distribution.
 
-# In[5]:
+# In[6]:
 
 
 # create the theoretical exponential distribution
@@ -122,22 +140,6 @@ yVals = np.array([np.exp(-t / meanValue) / meanValue for t in xVals])
 expDist = np.zeros((nVisPoints, 2))
 expDist[:, 0] = xVals
 expDist[:, 1] = yVals
-
-
-# In[6]:
-
-
-# for an alternative histogram representation I
-# create x,y data pairs of the histogram data using
-# numpy's histogram function
-nBins = 20
-hist, bin_edges = np.histogram(sampleTimes, bins = nBins, normed = True)
-bin_centers = (bin_edges[1:] + bin_edges[0:-1]) / 2.0
-assert hist.shape == bin_centers.shape
-
-scatterData = np.zeros((nBins, 2))
-scatterData[:, 0] = bin_centers
-scatterData[:, 1] = hist
 
 
 # In[7]:
@@ -273,7 +275,12 @@ def plot_histogram_comparison(X, nBins, scatterData, dist):
 # In[10]:
 
 
+# for an alternative histogram representation I
+# create x,y data pairs of the histogram data using
+# numpy's histogram function
 nBins = 20
+scatterData = getHistogramCoordinates(sampleTimes, nBins, normed = True)
+
 plot_histogram_comparison(sampleTimes, nBins, scatterData, expDist)
 
 
@@ -377,29 +384,13 @@ nVisPoints = 300
 tau_A = 1.0
 tau_B = 1.5
 xVals = np.linspace(-2.0, 20.0, nVisPoints)
-yVals = np.array([(np.exp(-t / tau_B) - np.exp(-t / tau_A)) / (tau_B - tau_A) for t in xVals])
+yVals = np.array([(np.exp(-t / tau_B) - np.exp(-t / tau_A))                   / (tau_B - tau_A) for t in xVals])
 dist2 = np.zeros((nVisPoints, 2))
 dist2[:, 0] = xVals
 dist2[:, 1] = yVals
 
 
 # In[15]:
-
-
-# for an alternative histogram representation I
-# create x,y data pairs of the histogram data using
-# numpy's histogram function
-nBins = 40
-hist, bin_edges = np.histogram(observedTimes, bins = nBins, normed = True)
-bin_centers = (bin_edges[1:] + bin_edges[0:-1]) / 2.0
-assert hist.shape == bin_centers.shape
-
-scatterData2 = np.zeros((nBins, 2))
-scatterData2[:, 0] = bin_centers
-scatterData2[:, 1] = hist
-
-
-# In[16]:
 
 
 # plotting function to plot the numerically sampled data 
@@ -456,14 +447,14 @@ def plot_histogram_wDist_2step(X, nBins, dist):
     return None
 
 
-# In[17]:
+# In[16]:
 
 
 nBins = 30
 plot_histogram_wDist_2step(observedTimes, nBins, dist2)
 
 
-# In[18]:
+# In[17]:
 
 
 def plot_scatter_histogram(X, dist):
@@ -527,13 +518,19 @@ def plot_scatter_histogram(X, dist):
     return None
 
 
-# In[19]:
+# In[18]:
 
+
+# for an alternative histogram representation I
+# create x,y data pairs of the histogram data using
+# numpy's histogram function
+nBins = 40
+scatterData2 = getHistogramCoordinates(observedTimes, nBins, True)
 
 plot_scatter_histogram(scatterData2, dist2)
 
 
-# In[24]:
+# In[19]:
 
 
 def plot_one_vs_two(X1, dist1, X2, dist2):
@@ -611,13 +608,125 @@ def plot_one_vs_two(X1, dist1, X2, dist2):
     return None
 
 
-# In[25]:
+# In[20]:
 
 
 plot_one_vs_two(scatterData, expDist, scatterData2, dist2)
 
 
 # In the plot above, we see that the observed waiting time distribution $p(t)$ of a one-step process is fudamentaly different from the observed waiting time distribution of a two-step process (1 hidden internal state). This internal state can thus be revealed by analysis of waiting time distributions.
+
+# ## Multi-step processes with equal characteristic time
+# Below we consider a multistep process, where each individual process has the same identical characteristic mean
+# waiting time $\tau$.
+
+# In[21]:
+
+
+# set the mean waiting times for a multi-step process
+tau = 1.0
+nBins = 50
+
+# specify the number of samples
+nSamples = 500000
+steps_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+res = []
+for j, steps in enumerate(steps_list):
+    
+    observedTimes = np.zeros((nSamples))
+
+    for i in range(steps):
+    
+        observedTimes += np.random.exponential(tau, nSamples)
+
+    assert observedTimes.shape == (nSamples,), "Error: Shape assertion failed."
+    
+    tmp = getHistogramCoordinates(observedTimes, nBins, True)
+    res.append(tmp)
+
+
+# In[22]:
+
+
+def plot_multi(res, labels):
+    
+    assert len(res) == len(labels), "Error: Length assertion failed."
+    
+    fig, ax = plt.subplots(1, 1, figsize = (6.5, 4.5))
+    
+    ax.plot([-1.0, 20.0], [0.0, 0.0],
+            dashes = [6.0, 3.0],
+            color = '#CCCCCC',
+            lw = 1.0,
+            zorder = 1)
+
+    for i in range(len(res)):
+        
+        X = res[i]
+        
+        ax.plot(X[:, 0], X[:, 1],
+                lw = 1.5,
+                # color = 'C0',
+                label = labels[i],
+                zorder = 3)
+
+    
+    ax.set_xlabel(r'waiting time $t$', fontsize = 16.0)
+    ax.set_ylabel(r'$p(t)$ observed / frequency', fontsize = 16.0)
+    ax.xaxis.labelpad = 10.0
+    ax.yaxis.labelpad = 15.0
+    
+    major_x_ticks = np.arange(0.0, 20.1, 2.0)
+    minor_x_ticks = np.arange(0.0, 20.1, 1.0)
+    ax.set_xticks(major_x_ticks)
+    ax.set_xticks(minor_x_ticks, minor = True)
+    
+    major_y_ticks = np.arange(0.0, 1.1, 0.1)
+    minor_y_ticks = np.arange(0.0, 1.1, 0.05)
+    ax.set_yticks(major_y_ticks)
+    ax.set_yticks(minor_y_ticks, minor = True)
+    
+    labelfontsize = 12.0
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(labelfontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(labelfontsize)
+    
+    ax.set_xlim(-0.25, 20.25)
+    ax.set_ylim(-0.025, 0.615)
+    ax.set_axisbelow(False)
+    
+    leg = ax.legend(bbox_to_anchor = [1.0, 1.0],
+                    loc = 'upper left',
+                    fontsize = 16.0,
+                    handlelength = 1.5, 
+                    scatterpoints = 1,
+                    markerscale = 1.0,
+                    ncol = 1)
+    leg.draw_frame(False)
+
+    return None
+
+
+# In[23]:
+
+
+# plot the mult-step results
+
+labels = [r'$n = 1$',
+          r'$n = 2$',
+          r'$n = 3$',
+          r'$n = 4$',
+          r'$n = 5$',
+          r'$n = 6$',
+          r'$n = 7$',
+          r'$n = 8$',
+          r'$n = 9$',
+          r'$n = 10$']
+
+plot_multi(res, labels)
+
 
 # For further information on this topic, vave a look at the following two sources:
 # 
