@@ -72,7 +72,7 @@
 # Remember, that we always assume, that the two processes happen in the same sequential order (first $A$, followed by step $B$).
 # Below we show by direct numerical sampling, that this is indeed the case and compare the observed waiting time distributions for the one and two step process.
 
-# In[1]:
+# In[4]:
 
 
 import numpy as np
@@ -80,7 +80,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
-# In[2]:
+# In[5]:
 
 
 def getHistogramCoordinates(X, nbins, normed = True):
@@ -98,14 +98,14 @@ def getHistogramCoordinates(X, nbins, normed = True):
     return res
 
 
-# In[3]:
+# In[6]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
 get_ipython().run_line_magic('config', "InlineBackend.figure_formats = {'png', 'retina'}")
 
 
-# In[4]:
+# In[7]:
 
 
 # this is how we can use python to sample from an exponential distribution
@@ -115,7 +115,7 @@ sampleTime = np.random.exponential(meanTime)
 print("sample waiting time =", sampleTime)
 
 
-# In[5]:
+# In[8]:
 
 
 # specify the number of samples
@@ -129,7 +129,7 @@ print(sampleTimes.shape)
 
 # Next we create the theoretical distribution, which for this case is of course the standard probability density function of the exponential distribution.
 
-# In[6]:
+# In[9]:
 
 
 # create the theoretical exponential distribution
@@ -142,7 +142,7 @@ expDist[:, 0] = xVals
 expDist[:, 1] = yVals
 
 
-# In[7]:
+# In[10]:
 
 
 # plotting function to plot the numerically sampled data 
@@ -199,14 +199,14 @@ def plot_histogram_wDist(X, nBins, dist):
     return None
 
 
-# In[8]:
+# In[11]:
 
 
 nBins = 20
 plot_histogram_wDist(sampleTimes, nBins, expDist)
 
 
-# In[9]:
+# In[12]:
 
 
 # plotting function to show that both version of the histogram
@@ -272,7 +272,7 @@ def plot_histogram_comparison(X, nBins, scatterData, dist):
     return None
 
 
-# In[10]:
+# In[13]:
 
 
 # for an alternative histogram representation I
@@ -284,7 +284,7 @@ scatterData = getHistogramCoordinates(sampleTimes, nBins, normed = True)
 plot_histogram_comparison(sampleTimes, nBins, scatterData, expDist)
 
 
-# In[11]:
+# In[14]:
 
 
 def plot_scatter_histogram(X, dist):
@@ -348,7 +348,7 @@ def plot_scatter_histogram(X, dist):
     return None
 
 
-# In[12]:
+# In[15]:
 
 
 plot_scatter_histogram(scatterData, expDist)
@@ -356,7 +356,7 @@ plot_scatter_histogram(scatterData, expDist)
 
 # Next we consider a two-step process. The first process has a mean waiting time $\tau_A$ and the second process a mean waiting time $\tau_B$.
 
-# In[13]:
+# In[16]:
 
 
 # set the mean waiting times for the two-step process
@@ -375,7 +375,7 @@ assert observedTimes.shape == (nSamples,), "Error: Shape assertion failed."
 print(observedTimes.shape)
 
 
-# In[14]:
+# In[17]:
 
 
 # create the theoretical distribution
@@ -390,7 +390,7 @@ dist2[:, 0] = xVals
 dist2[:, 1] = yVals
 
 
-# In[15]:
+# In[18]:
 
 
 # plotting function to plot the numerically sampled data 
@@ -447,14 +447,14 @@ def plot_histogram_wDist_2step(X, nBins, dist):
     return None
 
 
-# In[16]:
+# In[19]:
 
 
 nBins = 30
 plot_histogram_wDist_2step(observedTimes, nBins, dist2)
 
 
-# In[17]:
+# In[20]:
 
 
 def plot_scatter_histogram(X, dist):
@@ -518,7 +518,7 @@ def plot_scatter_histogram(X, dist):
     return None
 
 
-# In[18]:
+# In[21]:
 
 
 # for an alternative histogram representation I
@@ -530,7 +530,7 @@ scatterData2 = getHistogramCoordinates(observedTimes, nBins, True)
 plot_scatter_histogram(scatterData2, dist2)
 
 
-# In[19]:
+# In[22]:
 
 
 def plot_one_vs_two(X1, dist1, X2, dist2):
@@ -608,7 +608,7 @@ def plot_one_vs_two(X1, dist1, X2, dist2):
     return None
 
 
-# In[20]:
+# In[23]:
 
 
 plot_one_vs_two(scatterData, expDist, scatterData2, dist2)
@@ -620,7 +620,7 @@ plot_one_vs_two(scatterData, expDist, scatterData2, dist2)
 # Below we consider a multistep process, where each individual process has the same identical characteristic mean
 # waiting time $\tau$.
 
-# In[21]:
+# In[24]:
 
 
 # set the mean waiting times for a multi-step process
@@ -646,7 +646,7 @@ for j, steps in enumerate(steps_list):
     res.append(tmp)
 
 
-# In[22]:
+# In[25]:
 
 
 def plot_multi(res, labels):
@@ -709,7 +709,7 @@ def plot_multi(res, labels):
     return None
 
 
-# In[23]:
+# In[26]:
 
 
 # plot the mult-step results
@@ -726,6 +726,101 @@ labels = [r'$n = 1$',
           r'$n = 10$']
 
 plot_multi(res, labels)
+
+
+# Next we can compare a two step process with equal characteristic time scale $\tau$ to a single
+# process with a characteristic time scale of $\tau_1 = 2\tau$, to illustratet that this leads to something fundamentally different.
+
+# In[57]:
+
+
+# specify the number of samples
+nSamples = 200000
+baseTime = 1.0
+tau_1 = 2.0 * baseTime
+
+sampleTimes_1 = np.random.exponential(tau_1, nSamples)
+
+sampleTimes_2 = np.random.exponential(baseTime, nSamples) + np.random.exponential(baseTime, nSamples)
+
+assert sampleTimes_1.shape == (nSamples,), "Error: Shape assertion failed."
+assert sampleTimes_2.shape == (nSamples,), "Error: Shape assertion failed."
+print(sampleTimes_1.shape)
+print(sampleTimes_2.shape)
+
+nBins = 200
+sData_1 = getHistogramCoordinates(sampleTimes_1, nBins, True)
+sData_2 = getHistogramCoordinates(sampleTimes_2, nBins, True)
+print(sData_1.shape)
+print(sData_2.shape)
+
+
+# In[58]:
+
+
+def plot_base_vs_base2(X1, X2):
+    
+    fig, ax = plt.subplots(1, 1, figsize = (6.5, 4.5))
+    
+    ax.plot([-1.0, 20.0], [0.0, 0.0],
+            dashes = [6.0, 3.0],
+            color = '#CCCCCC',
+            lw = 1.0,
+            zorder = 1)
+    
+    ax.plot(X1[:, 0], X1[:, 1],
+            lw = 1.5,
+            color = 'C0',
+            label = r'one step ($\tau_1 = 2\tau$)',
+            zorder = 2)
+
+    ax.plot(X2[:, 0], X2[:, 1],
+            lw = 1.5,
+            color = 'C1',
+            label = r'two step (twice $\tau$)',
+            zorder = 2)
+
+    ax.set_xlabel(r'waiting time $t$', fontsize = 16.0)
+    ax.set_ylabel(r'$p(t)$ observed / frequency', fontsize = 16.0)
+    ax.xaxis.labelpad = 10.0
+    ax.yaxis.labelpad = 15.0
+    
+    major_x_ticks = np.arange(0.0, 20.1, 2.0)
+    minor_x_ticks = np.arange(0.0, 20.1, 1.0)
+    ax.set_xticks(major_x_ticks)
+    ax.set_xticks(minor_x_ticks, minor = True)
+    
+    major_y_ticks = np.arange(0.0, 1.1, 0.1)
+    minor_y_ticks = np.arange(0.0, 1.1, 0.05)
+    ax.set_yticks(major_y_ticks)
+    ax.set_yticks(minor_y_ticks, minor = True)
+    
+    labelfontsize = 12.0
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(labelfontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(labelfontsize)
+    
+    ax.set_xlim(-0.25, 13.25)
+    ax.set_ylim(-0.025, 0.515)
+    ax.set_axisbelow(False)
+    
+    leg = ax.legend(bbox_to_anchor = [1.0, 1.0],
+                    loc = 'upper left',
+                    fontsize = 16.0,
+                    handlelength = 1.5, 
+                    scatterpoints = 1,
+                    markerscale = 1.0,
+                    ncol = 1)
+    leg.draw_frame(False)
+
+    return None
+
+
+# In[59]:
+
+
+plot_base_vs_base2(sData_1, sData_2)
 
 
 # For further information on this topic, vave a look at the following two sources:
