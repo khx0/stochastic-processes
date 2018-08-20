@@ -3,9 +3,54 @@
 ##########################################################################################
 # author: Nikolas Schnellbaecher
 # contact: khx0@posteo.net
-# date: 2018-08-18
+# date: 2018-08-20
 # file: gillespie.py
 ##########################################################################################
+
+import numpy as np
+
+def sampleDiscreteDist(probs):
+    """
+    Randomly sample from a discrete probability distribution
+    as specified by probs .
+    """
+    # draw a random number
+    q = np.random.rand()
+    # find the corresponding index i
+    i = 0
+    pSum = 0.0
+    while pSum < q:
+        pSum += probs[i]
+        i += 1
+    return i - 1
+
+def drawEvent(params, propensityFunc, state):
+    """
+    Samples the next reaction event and its corresponding event time dt.
+    """
+    # calculate the propensities from the current state
+    props = propensityFunc(params, state)
+    
+    # sum of propensities
+    totalProps = props.sum()
+    
+    # species extinction case handling
+    # returns event == -1 to signal species extinction
+    if np.isclose(totalProps, 0.0, 1.0e-12):
+        return -1, -1.0
+    
+    # compute the next event time
+    # 1.0 / totalProps is the mean value of the exponential distribution
+    # from which the next event time is sampled
+    time = np.random.exponential(1.0 / totalProps)
+    
+    # compute the (discrete) reaction probabilities for each reaction
+    rxnProbs = props / totalProps
+    
+    # draw the reaction type which occurs (the channel that fires)
+    rxn = sampleDiscreteDist(rxnProbs)
+    
+    return rxn, time
 
 def gillespie_ssa(params, propensityFunc, updateMatrix, initialState, timePoints):
     """
@@ -86,3 +131,7 @@ def gillespie_ssa(params, propensityFunc, updateMatrix, initialState, timePoints
         iterationTime = iteration
     
     return out
+    
+if __name__ == '__main__':
+
+    pass
