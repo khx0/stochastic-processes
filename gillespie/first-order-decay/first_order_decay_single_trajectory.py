@@ -3,8 +3,8 @@
 ##########################################################################################
 # author: Nikolas Schnellbaecher
 # contact: khx0@posteo.net
-# date: 2018-08-20
-# file: first-order-decay.py
+# date: 2018-08-21
+# file: first_order_decay_single_trajectory.py
 ##########################################################################################
 
 import sys
@@ -54,15 +54,20 @@ def getPropensity(params, state):
 
 if __name__ == '__main__':
 
+    SAVE_RAW = True
+    
     # fix random number seed for reproducibility
     np.random.seed(42)
     
     params = np.array([1.0])
     timePoints = np.linspace(0, 10.0, 101)
     
-    initialState = np.array([20], dtype = int)
+    nSpecies = 1
+    nReactions = 1
+    n0 = 20
+    initialState = np.array([n0], dtype = int)
     
-    traj = np.empty((len(timePoints), 1))
+    traj = np.empty((len(timePoints), nSpecies))
     
     # run SSA
     traj[:, :] = gillespie_ssa(params, 
@@ -72,7 +77,21 @@ if __name__ == '__main__':
                                timePoints)
     
     # check trajectory shape after the SSA has run
-    assert traj.shape == (len(timePoints), 1), "Error: Shape assertion failed."
+    assert traj.shape == (len(timePoints), nSpecies), "Error: Shape assertion failed."
     print("Trajectory shape =", traj.shape)
+    
+    if (SAVE_RAW):
+    
+        outname = 'first-order-decay-single-trajectory_' + \
+                  'n0_{}'.format(n0) + \
+                  '.txt'
+                  
+        res = np.zeros((len(timePoints), nSpecies + 1))
+        res[:, 0] = timePoints
+        res[:, 1] = traj[:, 0]
+        
+        np.savetxt(os.path.join(RAWDIR, outname), res, fmt = '%.8f')
+    
+    
     
     
