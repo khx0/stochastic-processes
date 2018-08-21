@@ -7,6 +7,10 @@
 # file: plot_single_trajectory.py
 # tested with python 2.7.15 in conjunction with mpl version 2.2.2
 # tested with python 3.7.0  in conjunction with mpl version 2.2.2
+# Comment:
+# Note how I use the "ls = 'step'" option for plotting the raw trajectories
+# of a Gillespie SSA. This is a more faithful representation of the underlying 
+# raw data.
 ##########################################################################################
 
 import sys
@@ -128,7 +132,6 @@ def Plot(titlestr, X, Y, outname, outdir, pColors,
              lw = 1.0,
              label = 'theory',
              clip_on = True,
-             ls = 'steps',
              zorder = 2)
     
     ax1.plot(X[:, 0], X[:, 1],
